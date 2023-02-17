@@ -1,4 +1,4 @@
 module.exports = {
-    users: [],
-    sessions: [],
+    users: new Map(),
+    sessions: new Map(),
 }

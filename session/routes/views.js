@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
 router.get('/login', (req, res) => {
     const user = req.cookies?.session?.user;
 
-    if (user){
+    if (user) {
         return res.redirect(req.headers.referer || '/');
     }
 
@@ -19,7 +19,7 @@ router.get('/login', (req, res) => {
 router.get('/register', (req, res) => {
     const user = req.cookies?.session?.user;
 
-    if (user){
+    if (user) {
         return res.redirect(req.headers.referer || '/');
     }
 

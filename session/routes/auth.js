@@ -7,7 +7,7 @@ router.post('/register', (req, res) => {
     const { name, email, password } = req.body;
 
     try {
-        const existingUser =  storage.users.find((user) => user.email === email);
+        const existingUser =  storage.users.get(email);
 
         if (existingUser) {
             return res.status(409).send('Email already in use');
@@ -19,11 +19,11 @@ router.post('/register', (req, res) => {
             user: { name, email },
         }
 
-        storage.users.push(user);
-        storage.sessions.push(session);
+        storage.users.set(email, user);
+        storage.sessions.set(session.id, session);
 
         return res
-            .cookie('session', session)
+            .cookie('session', session, { httpOnly: true })
             .redirect('/');
     } catch (error) {
         console.error(error);
@@ -35,7 +35,7 @@ router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const existingUser =  storage.users.find((user) => user.email === email);
+        const existingUser =  storage.users.get(email);
 
         if (!existingUser) {
             return res.status(404).send('Could not find such user');
@@ -53,10 +53,10 @@ router.post('/login', (req, res) => {
             },
         }
 
-        storage.sessions.push(session);
+        storage.sessions.set(session.id, session);
 
         return res
-            .cookie('session', session)
+            .cookie('session', session, { httpOnly: true })
             .redirect('/');
     } catch (error) {
         console.error(error);
@@ -68,14 +68,12 @@ router.get('/logout', (req, res) => {
     const { session } = req.cookies;
 
     if (!session) {
-        return res.status(401).json('You are not logged in!');
+        return res.redirect(req.headers.referer || '/');
     }
-    const storageSession = storage.sessions.find((s) => s.id === session.id);
+    const storageSession = storage.sessions.get(session.id);
 
     if (storageSession) {
-        const storageSessionIndex = storage.sessions.indexOf(storageSession);
-
-        storage.sessions = storage.sessions.splice(storageSessionIndex, 1);
+        storage.sessions.delete(storageSession.id);
     }
 
     return res
