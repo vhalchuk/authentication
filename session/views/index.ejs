@@ -4,6 +4,23 @@
     <title>Session authentication</title>
 </head>
 <body style="height: 100vh; width: 100vw; display: grid; place-items: center;">
-<h1>Session authentication</h1>
+<div>
+    <header>
+        <h1>Session authentication</h1>
+    </header>
+    <% if (user) { %>
+        <main>
+            <p>Welcome back, <%= user.name %></p>
+            <a href="/profile">Go to profile</a>
+        </main>
+    <% } else { %>
+        <nav>
+            <ul>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+            </ul>
+        </nav>
+    <% } %>
+</div>
 </body>
 </html>
