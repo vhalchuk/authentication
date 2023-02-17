@@ -1,31 +1,39 @@
 const router = require('express').Router();
 
 router.get('/', (req, res) => {
-    res.render('index', { user: req.user });
+    const user = req.cookies?.session?.user;
+
+    res.render('index', { user });
 });
 
 router.get('/login', (req, res) => {
-    if(req.user){
-        res.redirect(req.headers.referer || '/');
+    const user = req.cookies?.session?.user;
+
+    if (user){
+        return res.redirect(req.headers.referer || '/');
     }
 
     res.render('login');
 });
 
 router.get('/register', (req, res) => {
-    if(req.user){
-        res.redirect(req.headers.referer || '/');
+    const user = req.cookies?.session?.user;
+
+    if (user){
+        return res.redirect(req.headers.referer || '/');
     }
 
     res.render('register');
 });
 
 router.get('/profile', (req, res) => {
-    if(!req.user){
-        res.redirect('/auth/login');
+    const user = req.cookies?.session?.user;
+
+    if (!user) {
+        return res.redirect('/login');
     }
 
-    res.render('profile', { user: req.user });
+    res.render('profile', { user });
 });
 
 module.exports = router;
