@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const storage = require("../storage");
+const storage = require("../util/storage");
 
 let sessionId = 0;
 
@@ -23,7 +23,7 @@ router.post('/register', (req, res) => {
         storage.sessions.set(session.id, session);
 
         return res
-            .cookie('session', session, { httpOnly: true })
+            .cookie('session', session, { httpOnly: true, secure: true, sameSite: 'strict' })
             .redirect('/');
     } catch (error) {
         console.error(error);
@@ -56,7 +56,7 @@ router.post('/login', (req, res) => {
         storage.sessions.set(session.id, session);
 
         return res
-            .cookie('session', session, { httpOnly: true })
+            .cookie('session', session, { httpOnly: true, secure: true, sameSite: 'strict' })
             .redirect('/');
     } catch (error) {
         console.error(error);
