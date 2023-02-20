@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Session authentication</title>
+</head>
+<body>
+<% if (user) { %>
+    <p>Welcome back, <%= user.name %></p>
+    <a href="/profile">Go to profile</a>
+<% } else { %>
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+<% } %>
+</body>
+</html>
