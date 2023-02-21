@@ -6,11 +6,6 @@ const setTokensCookies = (res, accessToken, refreshToken) => {
         .cookie('refreshToken', refreshToken, cookieOptions);
 };
 
-const clearCookies = (res) => {
-    return res.clearCookie('accessToken').clearCookie('refreshToken');
-};
-
 module.exports = {
     setTokensCookies,
-    clearCookies,
 }

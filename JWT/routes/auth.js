@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const storage = require('../util/storage');
 const { accessTokenGenerator, refreshTokenGenerator } = require('../util/tokenGenerators');
-const { setTokensCookies, clearCookies } = require('../util/helpers');
+const { setTokensCookies } = require('../util/helpers');
 
 router.post('/register', (req, res) => {
     const { name, email, password } = req.body;
@@ -65,8 +65,11 @@ router.get('/logout', (req, res) => {
         .get(req.user.email)
         .delete(req.cookies.refreshToken);
 
-    clearCookies(res);
-    res.redirect('/');
+
+    res
+        .clearCookie('accessToken')
+        .clearCookie('refreshToken')
+        .redirect('/');
 });
 
 module.exports = router;

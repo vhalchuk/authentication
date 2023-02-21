@@ -18,7 +18,7 @@ router.post('/register', (req, res) => {
     const sessionId = uuid.v4();
 
     storage.users.set(email, user);
-    storage.sessions.set(sessionId, user);
+    storage.sessions.set(sessionId, { user });
 
     return res
         .cookie('session', sessionId, cookieOptions)
@@ -40,7 +40,7 @@ router.post('/login', (req, res) => {
 
     const sessionId = uuid.v4();
 
-    storage.sessions.set(sessionId, existingUser);
+    storage.sessions.set(sessionId, { user: existingUser });
 
     return res
         .cookie('session', sessionId, cookieOptions)

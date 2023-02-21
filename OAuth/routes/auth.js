@@ -1,9 +1,11 @@
 const router = require('express').Router();
 const axios = require('axios');
 const uuid = require('uuid');
-const storage = require("../util/storage");
+const storage = require('../util/storage');
 
 router.get('/login/google', (req, res) => {
+    if (req.user) return res.redirect('/');
+
     const urlSearchParams = new URLSearchParams({
         client_id: process.env.GOOGLE_CLIENT_ID,
         redirect_uri: 'http://localhost:3000/auth/callback/google',
@@ -40,16 +42,15 @@ router.get('/callback/google', async (req, res) => {
         });
         const { id: userId, ...userData } = userInfoResponse.data;
 
+        const existingUser = storage.users.get(userId);
 
-        const user = storage.users.get(userId);
-
-        if (!user) {
+        if (!existingUser) {
             storage.users.set(userId, userData);
         }
 
         const sessionId = uuid.v4();
 
-        storage.sessions.set(sessionId, user || userData);
+        storage.sessions.set(sessionId, { user: existingUser || userData });
 
         res
             .cookie('session', sessionId, { httpOnly: true, secure: true, sameSite: 'strict' })
