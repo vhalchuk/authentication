@@ -5,25 +5,19 @@ router.get('/', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-    if (req.user) {
-        return res.redirect(req.headers.referer || '/');
-    }
+    if (req.user) return res.redirect('/');
 
     res.render('login');
 });
 
 router.get('/register', (req, res) => {
-    if (req.user) {
-        return res.redirect(req.headers.referer || '/');
-    }
+    if (req.user) return res.redirect('/');
 
     res.render('register');
 });
 
 router.get('/profile', (req, res) => {
-    if (!req.user) {
-        return res.redirect('/login');
-    }
+    if (!req.user) return res.redirect('/login');
 
     res.render('profile', { user: req.user });
 });

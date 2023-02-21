@@ -2,7 +2,6 @@ const router = require('express').Router();
 const axios = require('axios');
 const uuid = require('uuid');
 const storage = require("../util/storage");
-const authenticateUser = require("../util/authenticateUser");
 
 router.get('/login/google', (req, res) => {
     const urlSearchParams = new URLSearchParams({
@@ -53,20 +52,20 @@ router.get('/callback/google', async (req, res) => {
         storage.sessions.set(sessionId, user || userData);
 
         res
-            .cookie('sessionId', sessionId, { httpOnly: true, secure: true, sameSite: 'strict' })
+            .cookie('session', sessionId, { httpOnly: true, secure: true, sameSite: 'strict' })
             .redirect('/');
     } catch (error) {
         res.status(500).send('An error occurred');
     }
 });
 
-router.get('/logout', authenticateUser, (req, res) => {
+router.get('/logout', (req, res) => {
     if (!req.user) return res.redirect('/');
 
-    storage.sessions.delete(req.cookies.sessionId);
+    storage.sessions.delete(req.cookies.session);
 
     res
-        .clearCookie('sessionId')
+        .clearCookie('session')
         .redirect('/');
 });
 

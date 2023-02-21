@@ -1,12 +1,11 @@
-const authenticateUser = require("../util/authenticateUser");
 const router = require('express').Router();
 
-router.get('/', authenticateUser, (req, res) => {
+router.get('/', (req, res) => {
     res.render('index', { user: req.user });
 });
 
-router.get('/profile', authenticateUser, (req, res) => {
-    if (!req.user) return res.redirect('/');
+router.get('/profile', (req, res) => {
+    if (!req.user) return res.redirect('/login');
 
     res.render('profile', { user: req.user });
 });
