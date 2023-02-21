@@ -1,34 +1,23 @@
 const router = require('express').Router();
-const authenticateToken = require('../util/authenticate-token');
 
-router.get('/', authenticateToken({ strict: false }), (req, res) => {
+router.get('/', (req, res) => {
     res.render('index', { user: req.user });
 });
 
 router.get('/login', (req, res) => {
-    const user = req.session?.user;
-
-    if (user) {
-        return res.redirect(req.headers.referer || '/');
-    }
+    if (req.user) return res.redirect('/');
 
     res.render('login');
 });
 
 router.get('/register', (req, res) => {
-    const user = req.session?.user;
-
-    if (user) {
-        return res.redirect(req.headers.referer || '/');
-    }
+    if (req.user) return res.redirect('/');
 
     res.render('register');
 });
 
-router.get('/profile', authenticateToken(), (req, res) => {
-    if (!req.user) {
-        return res.redirect('/login');
-    }
+router.get('/profile', (req, res) => {
+    if (!req.user) return res.redirect('/login');
 
     res.render('profile', { user: req.user });
 });

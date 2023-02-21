@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const storage = require('../util/storage');
-const authenticateToken = require('../util/authenticate-token');
-const { accessTokenGenerator, refreshTokenGenerator } = require('../util/token-generator');
+const { accessTokenGenerator, refreshTokenGenerator } = require('../util/tokenGenerators');
 const { setTokensCookies, clearCookies } = require('../util/helpers');
 
 router.post('/register', (req, res) => {
@@ -59,7 +58,9 @@ router.post('/login', (req, res) => {
     }
 });
 
-router.get('/logout', authenticateToken(), (req, res) => {
+router.get('/logout', (req, res) => {
+    if (!req.user) return res.redirect('/');
+
     storage.refreshTokens
         .get(req.user.email)
         .delete(req.cookies.refreshToken);

@@ -1,20 +1,13 @@
-const TokenExpiredError = require("jsonwebtoken/lib/TokenExpiredError");
+const TokenExpiredError = require('jsonwebtoken/lib/TokenExpiredError');
 const storage = require('../util/storage');
-const { accessTokenGenerator, refreshTokenGenerator } = require('../util/token-generator')
+const { accessTokenGenerator, refreshTokenGenerator } = require('./tokenGenerators')
 const { setTokensCookies, clearCookies } = require('./helpers');
 
-const handleReject = (strict, res, next) => {
-    if (strict) {
-        return res.redirect('/login');
-    }
-    return next();
-}
-
-const authenticateToken = ({ strict = true } = {}) => async (req, res, next) => {
+const authenticateUser = async (req, res, next) => {
     const accessToken = req.cookies.accessToken;
 
     if (!accessToken) {
-        return handleReject(strict, res, next);
+        return next();
     }
 
     const accessTokenPayload = accessTokenGenerator.decode(accessToken);
@@ -25,13 +18,13 @@ const authenticateToken = ({ strict = true } = {}) => async (req, res, next) => 
         return next();
     } catch (error) {
         if (!(error instanceof TokenExpiredError)) {
-            return handleReject(strict, res, next);
+            return next();
         }
 
         const refreshToken = req.cookies.refreshToken;
 
         if (!refreshToken) {
-            return handleReject(strict, res, next);
+            return next();
         }
 
         try {
@@ -43,11 +36,11 @@ const authenticateToken = ({ strict = true } = {}) => async (req, res, next) => 
             if (!userRefreshTokens.has(refreshToken)) {
                 userRefreshTokens.clear();
                 clearCookies(res);
-                return handleReject(strict, res, next);
+                return next();
             }
         } catch (error) {
             clearCookies(res);
-            return handleReject(strict, res, next);
+            return next();
         }
 
         delete accessTokenPayload.iat;
@@ -68,4 +61,4 @@ const authenticateToken = ({ strict = true } = {}) => async (req, res, next) => 
     }
 };
 
-module.exports = authenticateToken;
+module.exports = authenticateUser;
