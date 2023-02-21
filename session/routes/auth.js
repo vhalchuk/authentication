@@ -1,80 +1,56 @@
 const router = require('express').Router();
-const storage = require("../util/storage");
+const storage = require('../util/storage');
+const uuid = require('uuid');
+const authenticateUser = require("../util/authenticateUser");
 
-let sessionId = 0;
+const cookieOptions = { httpOnly: true, secure: true, sameSite: 'strict' };
 
 router.post('/register', (req, res) => {
     const { name, email, password } = req.body;
 
-    try {
-        const existingUser =  storage.users.get(email);
+    const existingUser =  storage.users.get(email);
 
-        if (existingUser) {
-            return res.status(409).send('Email already in use');
-        }
-
-        const user = { name, email, password };
-        const session = {
-            id: ++sessionId,
-            user: { name, email },
-        }
-
-        storage.users.set(email, user);
-        storage.sessions.set(session.id, session);
-
-        return res
-            .cookie('session', session, { httpOnly: true, secure: true, sameSite: 'strict' })
-            .redirect('/');
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send('Internal server error');
+    if (existingUser) {
+        return res.status(409).send('Email already in use');
     }
+
+    const user = { name, email, password };
+    const sessionId = uuid.v4();
+
+    storage.users.set(email, user);
+    storage.sessions.set(sessionId, user);
+
+    return res
+        .cookie('session', sessionId, cookieOptions)
+        .redirect('/');
 });
 
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    try {
-        const existingUser =  storage.users.get(email);
+    const existingUser =  storage.users.get(email);
 
-        if (!existingUser) {
-            return res.status(404).send('Could not find such user');
-        }
-
-        if (password !== existingUser.password) {
-            return res.status(400).send('Wrong password');
-        }
-
-        const session = {
-            id: ++sessionId,
-            user: {
-                name: existingUser.name,
-                email: existingUser.email
-            },
-        }
-
-        storage.sessions.set(session.id, session);
-
-        return res
-            .cookie('session', session, { httpOnly: true, secure: true, sameSite: 'strict' })
-            .redirect('/');
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send('Internal server error');
+    if (!existingUser) {
+        return res.status(404).send('Could not find such user');
     }
+
+    if (password !== existingUser.password) {
+        return res.status(400).send('Wrong password');
+    }
+
+    const sessionId = uuid.v4();
+
+    storage.sessions.set(sessionId, existingUser);
+
+    return res
+        .cookie('session', sessionId, cookieOptions)
+        .redirect('/');
 });
 
-router.get('/logout', (req, res) => {
-    const { session } = req.cookies;
+router.get('/logout', authenticateUser, (req, res) => {
+    if (!req.user) return res.redirect('/');
 
-    if (!session) {
-        return res.redirect(req.headers.referer || '/');
-    }
-    const storageSession = storage.sessions.get(session.id);
-
-    if (storageSession) {
-        storage.sessions.delete(storageSession.id);
-    }
+    storage.sessions.delete(req.cookies.session);
 
     return res
         .clearCookie('session')
